@@ -74,3 +74,7 @@ class BlueprintsTest(CliCommandTest):
                         '-p {0}/bad_blueprint/blueprint.yaml'
                         .format(BLUEPRINTS_DIR),
                         'Failed to validate blueprint')
+
+    def test_blueprint_inputs(self):
+        self.client.blueprints.inputs = MagicMock(return_value=[])
+        cli_runner.run_cli('cfy blueprints inputs -b a-blueprint-id')
