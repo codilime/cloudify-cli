@@ -328,6 +328,13 @@ def parser_config():
                                 'action': 'store_true',
                                 'default': False,
                                 'help': 'Restore snapshot without deployment environments'
+                            } ,
+                            '--clear-manager': {
+                                'dest': 'clear_manager',
+                                'action': 'store_true',
+                                'default': False,
+                                'help': 'Specify this flag to clear_manager data '
+                                        'instead of asserting if it is clean'
                             }
                         },
                         'help': 'command for restoring manager to specific snapshot',
