@@ -335,6 +335,13 @@ def parser_config():
                                 'default': False,
                                 'help': 'Specify this flag to clear_manager data '
                                         'instead of asserting if it is clean'
+                            },
+                            '--skip-asserts': {
+                                'dest': 'skip_asserts',
+                                'action': 'store_true',
+                                'default': False,
+                                'help': 'Specify this flag to skip checking '
+                                        'whether the manager is actually clean'
                             }
                         },
                         'help': 'command for restoring manager to specific snapshot',
