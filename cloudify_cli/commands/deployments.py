@@ -42,15 +42,15 @@ def _print_deployment_inputs(client, blueprint_id):
 
 def ls(blueprint_id):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
     if blueprint_id:
         logger.info("Getting deployments list for blueprint: "
                     "'{0}'... [manager={1}]"
-                    .format(blueprint_id, management_ip))
+                    .format(blueprint_id, rest_host))
     else:
         logger.info('Getting deployments list...[manager={0}]'
-                    .format(management_ip))
+                    .format(rest_host))
     deployments = client.deployments.list()
     if blueprint_id:
         deployments = filter(lambda deployment:
@@ -68,13 +68,13 @@ def ls(blueprint_id):
 
 def create(blueprint_id, deployment_id, inputs):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
+    rest_host = utils.get_rest_host()
     inputs = utils.inputs_to_dict(inputs, 'inputs')
 
     logger.info('Creating new deployment from blueprint {0} at '
                 'management server {1}'
-                .format(blueprint_id, management_ip))
-    client = utils.get_rest_client(management_ip)
+                .format(blueprint_id, rest_host))
+    client = utils.get_rest_client(rest_host)
 
     try:
         deployment = client.deployments.create(blueprint_id,
@@ -97,21 +97,21 @@ def create(blueprint_id, deployment_id, inputs):
 
 def delete(deployment_id, ignore_live_nodes):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
+    rest_host = utils.get_rest_host()
     logger.info('Deleting deployment {0} from management server {1}'
-                .format(deployment_id, management_ip))
-    client = utils.get_rest_client(management_ip)
+                .format(deployment_id, rest_host))
+    client = utils.get_rest_client(rest_host)
     client.deployments.delete(deployment_id, ignore_live_nodes)
     logger.info("Deleted deployment successfully")
 
 
 def outputs(deployment_id):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
 
     logger.info("Getting outputs for deployment: {0} [manager={1}]".format(
-        deployment_id, management_ip))
+        deployment_id, rest_host))
 
     dep = client.deployments.get(deployment_id, _include=['outputs'])
     outputs_def = dep.outputs

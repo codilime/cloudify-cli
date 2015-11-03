@@ -25,11 +25,11 @@ from cloudify_cli.logger import get_logger
 
 def get(deployment_id, node_id):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
 
     logger.info('Getting node: \'{0}\' for deployment with ID \'{1}\' '
-                '[manager={2}]'.format(node_id, deployment_id, management_ip))
+                '[manager={2}]'.format(node_id, deployment_id, rest_host))
     try:
         node = client.nodes.get(deployment_id, node_id)
     except CloudifyClientError, e:
@@ -72,16 +72,16 @@ def get(deployment_id, node_id):
 
 def ls(deployment_id):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
     try:
         if deployment_id:
             logger.info('Getting nodes list for deployment: \'{0}\' '
-                        '[manager={1}]'.format(deployment_id, management_ip))
+                        '[manager={1}]'.format(deployment_id, rest_host))
         else:
             logger.info(
                 'Getting a list of all nodes: [manager={0}]'.format(
-                    management_ip))
+                    rest_host))
         nodes = client.nodes.list(deployment_id=deployment_id)
     except CloudifyClientError, e:
         if not e.status_code != 404:

@@ -36,13 +36,13 @@ _STATUS_CANCELING_MESSAGE = (
 
 def get(execution_id):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
 
     try:
         logger.info('Getting execution: '
                     '\'{0}\' [manager={1}]'
-                    .format(execution_id, management_ip))
+                    .format(execution_id, rest_host))
         execution = client.executions.get(execution_id)
     except exceptions.CloudifyClientError, e:
         if e.status_code != 404:
@@ -69,16 +69,16 @@ def get(execution_id):
 
 def ls(deployment_id, include_system_workflows):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
     try:
         if deployment_id:
             logger.info('Getting executions list for deployment: \'{0}\' '
-                        '[manager={1}]'.format(deployment_id, management_ip))
+                        '[manager={1}]'.format(deployment_id, rest_host))
         else:
             logger.info(
                 'Getting a list of all executions: [manager={0}]'.format(
-                    management_ip))
+                    rest_host))
         executions = client.executions.list(
             deployment_id=deployment_id,
             include_system_workflows=include_system_workflows)
@@ -103,12 +103,12 @@ def start(workflow_id, deployment_id, timeout, force,
           allow_custom_parameters, include_logs, parameters, json):
     logger = get_logger()
     parameters = utils.inputs_to_dict(parameters, 'parameters')
-    management_ip = utils.get_management_server_ip()
+    rest_host = utils.get_rest_host()
     logger.info("Executing workflow '{0}' on deployment '{1}' at"
                 " management server {2} [timeout={3} seconds]"
                 .format(workflow_id,
                         deployment_id,
-                        management_ip,
+                        rest_host,
                         timeout))
 
     events_logger = get_events_logger(json)
@@ -119,7 +119,7 @@ def start(workflow_id, deployment_id, timeout, force,
     original_timeout = timeout
 
     try:
-        client = utils.get_rest_client(management_ip)
+        client = utils.get_rest_client(rest_host)
         try:
             execution = client.executions.start(
                 deployment_id,
@@ -196,17 +196,17 @@ def start(workflow_id, deployment_id, timeout, force,
 
 def cancel(execution_id, force):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
     logger.info(
         '{0}Cancelling execution {1} on management server {2}'
-        .format('Force-' if force else '', execution_id, management_ip))
+        .format('Force-' if force else '', execution_id, rest_host))
     client.executions.cancel(execution_id, force)
     logger.info(
         'A cancel request for execution {0} has been sent to management '
         "server {1}. To track the execution's status, use:\n"
         "cfy executions get -e {0}"
-        .format(execution_id, management_ip))
+        .format(execution_id, rest_host))
 
 
 def _get_deployment_environment_creation_execution(client, deployment_id):

@@ -28,13 +28,13 @@ from cloudify_cli import utils
 
 def ls(execution_id, include_logs, tail, json):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
+    rest_host = utils.get_rest_host()
     logger.info("Getting events from management server {0} for "
                 "execution id '{1}' "
-                "[include_logs={2}]".format(management_ip,
+                "[include_logs={2}]".format(rest_host,
                                             execution_id,
                                             include_logs))
-    client = utils.get_rest_client(management_ip)
+    client = utils.get_rest_client(rest_host)
     try:
         execution_events = ExecutionEventsFetcher(
             client,

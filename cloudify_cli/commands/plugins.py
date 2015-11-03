@@ -54,10 +54,10 @@ def validate(plugin_path):
 
 def delete(plugin_id, force):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
 
-    logger.info(messages.PLUGIN_DELETE.format(plugin_id, management_ip))
+    logger.info(messages.PLUGIN_DELETE.format(plugin_id, rest_host))
     client.plugins.delete(plugin_id=plugin_id,
                           force=force)
 
@@ -65,17 +65,17 @@ def delete(plugin_id, force):
 
 
 def upload(plugin_path):
-    server_ip = utils.get_management_server_ip()
-    utils.upload_plugin(plugin_path, server_ip,
-                        utils.get_rest_client(server_ip), validate)
+    rest_host = utils.get_rest_host()
+    utils.upload_plugin(plugin_path, utils.get_rest_client(rest_host),
+                        validate)
 
 
 def download(plugin_id,
              output):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
+    rest_host = utils.get_rest_host()
     logger.info(messages.DOWNLOADING_PLUGIN.format(plugin_id))
-    client = utils.get_rest_client(management_ip)
+    client = utils.get_rest_client(rest_host)
     target_file = client.plugins.download(plugin_id, output)
     logger.info(messages.DOWNLOADING_PLUGIN_SUCCEEDED.format(plugin_id,
                                                              target_file))
@@ -87,10 +87,10 @@ fields = ['id', 'package_name', 'package_version', 'supported_platform',
 
 def get(plugin_id):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
 
-    logger.info(messages.PLUGINS_GET.format(plugin_id, management_ip))
+    logger.info(messages.PLUGINS_GET.format(plugin_id, rest_host))
     plugin = client.plugins.get(plugin_id, _include=fields)
 
     pt = utils.table(fields, data=[plugin])
@@ -99,10 +99,10 @@ def get(plugin_id):
 
 def ls():
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
 
-    logger.info(messages.PLUGINS_LIST.format(management_ip))
+    logger.info(messages.PLUGINS_LIST.format(rest_host))
     plugins = client.plugins.list(_include=fields)
 
     pt = utils.table(fields, data=plugins)

@@ -25,11 +25,11 @@ from cloudify_cli.logger import get_logger
 
 def get(node_instance_id):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
 
     logger.info('Getting node instance with ID: \'{0}\' [manager={1}]'
-                .format(node_instance_id, management_ip))
+                .format(node_instance_id, rest_host))
     try:
         node_instance = client.node_instances.get(node_instance_id)
     except CloudifyClientError, e:
@@ -54,16 +54,16 @@ def get(node_instance_id):
 
 def ls(deployment_id, node_name=None):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
     try:
         if deployment_id:
             logger.info('Getting instances list for deployment: \'{0}\' '
-                        '[manager={1}]'.format(deployment_id, management_ip))
+                        '[manager={1}]'.format(deployment_id, rest_host))
         else:
             logger.info(
                 'Getting a list of all instances: [manager={0}]'.format(
-                    management_ip))
+                    rest_host))
         instances = client.node_instances.list(deployment_id=deployment_id,
                                                node_name=node_name)
     except CloudifyClientError, e:

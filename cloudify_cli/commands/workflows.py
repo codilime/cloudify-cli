@@ -25,12 +25,12 @@ from cloudify_cli import utils
 
 def get(deployment_id, workflow_id):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
     try:
         logger.info('Getting workflow '
                     '\'{0}\' of deployment \'{1}\' [manager={2}]'
-                    .format(workflow_id, deployment_id, management_ip))
+                    .format(workflow_id, deployment_id, rest_host))
         deployment = client.deployments.get(deployment_id)
         workflow = next((wf for wf in deployment.workflows if
                          wf.name == workflow_id), None)
@@ -84,12 +84,12 @@ def get(deployment_id, workflow_id):
 
 def ls(deployment_id):
     logger = get_logger()
-    management_ip = utils.get_management_server_ip()
-    client = utils.get_rest_client(management_ip)
+    rest_host = utils.get_rest_host()
+    client = utils.get_rest_client(rest_host)
 
     logger.info('Getting workflows list for deployment: '
                 '\'{0}\'... [manager={1}]'
-                .format(deployment_id, management_ip))
+                .format(deployment_id, rest_host))
 
     deployment = client.deployments.get(deployment_id)
     workflows = deployment.workflows
