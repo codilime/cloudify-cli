@@ -337,7 +337,7 @@ def parser_config():
                                         'instead of asserting if it is clean'
                             },
                             '--skip-asserts': {
-                                'dest': 'skip_asserts',
+                                'dest': 'force',
                                 'action': 'store_true',
                                 'default': False,
                                 'help': 'Specify this flag to skip checking '
