@@ -374,6 +374,21 @@ def parser_config():
                         },
                         'help': 'List agents',
                         'handler': cfy.agents.ls
+                    },
+                    'validate': {
+                        'arguments': {
+                            '-d,--deployment-id': deployment_id_argument(
+                                hlp='The id of the deployment to validate agents for. If ommited, this '
+                                'will validate agents for all deployments'
+                            ),
+                            '-l,--include-logs': {
+                                'dest': 'include_logs',
+                                'action': 'store_true',
+                                'help': 'Include logs in returned events'
+                            }
+                        },
+                        'help':'Check if agents are alive on deployments',
+                        'handler': cfy.agents.validate
                     }
                 }
             },

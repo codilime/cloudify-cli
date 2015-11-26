@@ -41,7 +41,7 @@ def _deployment_exists(client, deployment_id):
     return True
 
 
-def install(deployment_id, include_logs):
+def _run_install_new_agents_workflow(deployment_id, include_logs, params):
     workflow_id = 'install_new_agents'
     logger = get_logger()
     client = utils.get_rest_client()
@@ -56,15 +56,12 @@ def install(deployment_id, include_logs):
             logger.error("Deployment '{0}' is not installed"
                          .format(deployment_id))
             raise SuppressedCloudifyCliError()
-        logger.info("Installing agent for deployment '{0}'"
-                    .format(deployment_id))
     else:
         deps = [dep.id for dep in client.deployments.list()
                 if _is_deployment_installed(client, dep.id)]
         if not deps:
             logger.error('There are no deployments installed')
             raise SuppressedCloudifyCliError()
-        logger.info('Installing agents for all installed deployments')
 
     error_summary = []
     error_summary_lock = threading.Lock()
@@ -89,6 +86,8 @@ def install(deployment_id, include_logs):
             execution = client.executions.start(
                 dep_id,
                 workflow_id,
+                parameters=params,
+                allow_custom_parameters=True
             )
 
             execution = wait_for_execution(
@@ -124,11 +123,12 @@ def install(deployment_id, include_logs):
 
     threads = [threading.Thread(target=worker, args=(dep_id,))
                for dep_id in deps]
-
     for t in threads:
+        t.daemon = True
         t.start()
     for t in threads:
-        t.join()
+        while t.is_alive():
+            t.join(1)
 
     if error_summary:
         logger.error('Summary:\n{0}\n'.format(
@@ -136,6 +136,22 @@ def install(deployment_id, include_logs):
         ))
 
         raise SuppressedCloudifyCliError()
+
+
+def install(deployment_id, include_logs):
+    if deployment_id:
+        logger.info("Installing agent for deployment '{0}'"
+                    .format(deployment_id))
+    else:
+        logger.info('Installing agents for all installed deployments')
+    _run_install_new_agents_workflow(deployment_id, include_logs, {
+        'validate': True, 'install': True})
+
+
+def validate(deployment_id, include_logs):
+    _run_install_new_agents_workflow(deployment_id, include_logs, {
+        'validate': True, 'install': False})
+    ls(deployment_id)
 
 
 def ls(deployment_id):
