@@ -364,6 +364,16 @@ def parser_config():
                         },
                         'help':'command for installing agents on deployments',
                         'handler': cfy.agents.install
+                    },
+                    'list': {
+                        'arguments': {
+                            '-d,--deployment-id': deployment_id_argument(
+                                hlp='The id of the deployment to list agents for. If ommited, this '
+                                'will list agents for all deployments'
+                            ),
+                        },
+                        'help': 'List agents',
+                        'handler': cfy.agents.ls
                     }
                 }
             },

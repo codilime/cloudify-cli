@@ -13,6 +13,7 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
+import datetime
 import threading
 
 from cloudify_cli import utils
@@ -135,3 +136,22 @@ def install(deployment_id, include_logs):
         ))
 
         raise SuppressedCloudifyCliError()
+
+
+def ls(deployment_id):
+    client = utils.get_rest_client()
+    agents = client.agents.list(deployment_id=deployment_id)
+    for agent in agents:
+        if not agent.validated:
+            only_validated_fields = ['alive', 'validation_time',
+                                     'installable']
+            for k in only_validated_fields:
+                agent[k] = ''
+        else:
+            agent['validation_time'] = datetime.datetime.fromtimestamp(
+                float(agent['last_validation_timestamp']))
+    pt = utils.table(
+        ['id', 'deployment_id', 'state', 'validated', 'alive',
+         'installable', 'validation_time'],
+        agents)
+    utils.print_table('Agents:', pt)
