@@ -486,7 +486,7 @@ def table(cols, data, defaults=None):
 
 def upload_plugin(plugin_path, management_ip, rest_client, validate):
     logger = get_logger()
-    validate(plugin_path)
+    validate(plugin_path.name)
     logger.info(messages.UPLOADING_PLUGIN
                 .format(plugin_path.name, management_ip))
     plugin = rest_client.plugins.upload(plugin_path.name)

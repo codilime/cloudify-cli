@@ -13,3 +13,6 @@ logging:
 
     # rest client http logs, including headers.
     cloudify.rest_client.http: info
+
+    # logger used  by wagon - for error messages when plugin installation fails
+    user: error

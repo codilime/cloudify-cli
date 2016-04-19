@@ -30,6 +30,7 @@ def bootstrap(keep_up,
               blueprint_path,
               inputs,
               install_plugins,
+              repository_addr,
               task_retries,
               task_retry_interval,
               task_thread_pool_size):
@@ -61,6 +62,7 @@ def bootstrap(keep_up,
             task_retry_interval=task_retry_interval,
             task_thread_pool_size=task_thread_pool_size,
             install_plugins=install_plugins,
+            repository_addr=repository_addr,
             resolver=utils.get_import_resolver())
         logger.info('bootstrap validation completed successfully')
 
@@ -74,7 +76,8 @@ def bootstrap(keep_up,
                 task_retries=task_retries,
                 task_retry_interval=task_retry_interval,
                 task_thread_pool_size=task_thread_pool_size,
-                install_plugins=install_plugins)
+                install_plugins=install_plugins,
+                repository_addr=repository_addr)
 
             manager_ip = details['manager_ip']
             provider_context = details['provider_context']
