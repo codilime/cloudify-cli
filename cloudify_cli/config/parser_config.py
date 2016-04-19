@@ -243,6 +243,13 @@ def auto_generate_ids_argument():
     }
 
 
+def plugin_repository_argument():
+    return {
+        'dest': 'repository_addr',
+        'help': 'Address of the plugin repository - http or local path'
+    }
+
+
 def parser_config():
     return {
         'description': 'Manages Cloudify in different Cloud Environments',
@@ -857,6 +864,7 @@ def parser_config():
                                                         DEFAULT_INPUTS_PATH_FOR_INSTALL_COMMAND)
                                                 ),
                             '--install-plugins': install_plugins_argument(),
+                            '--plugin-repository': plugin_repository_argument(),
                             '-w,--workflow': make_optional(
                                     workflow_id_argument(
                                             hlp='The workflow to start '
@@ -909,7 +917,8 @@ def parser_config():
                                         'This argument can be used multiple times.'
                                         .format(FORMAT_INPUT_AS_YAML_OR_DICT)
                                 ),
-                            '--install-plugins': install_plugins_argument()
+                            '--install-plugins': install_plugins_argument(),
+                            '--plugin-repository': plugin_repository_argument()
                         },
                         'handler': cfy.local.init
                     },
@@ -920,6 +929,7 @@ def parser_config():
                                 local_blueprint_path_argument(
                                         hlp='Path to a blueprint'
                                 ),
+                            '-r,--plugin-repository': plugin_repository_argument()
                         },
                         'handler': cfy.local.install_plugins
                     },
@@ -1060,6 +1070,7 @@ def parser_config():
                                 'actually performing the bootstrap process'
                     },
                     '--install-plugins': install_plugins_argument(),
+                    '--plugin-repository': plugin_repository_argument(),
                     '--task-retries': task_retries_argument(5),
                     '--task-retry-interval': task_retry_interval_argument(30),
                     '--task-thread-pool-size':

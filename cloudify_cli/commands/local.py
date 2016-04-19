@@ -39,7 +39,7 @@ _STORAGE_DIR_NAME = 'local-storage'
 
 def install(blueprint_path, inputs, install_plugins, workflow_id, parameters,
             allow_custom_parameters, task_retries, task_retry_interval,
-            task_thread_pool_size):
+            task_thread_pool_size, repository_addr):
 
     # if no blueprint path was supplied, set it to a default value
     if not blueprint_path:
@@ -56,7 +56,8 @@ def install(blueprint_path, inputs, install_plugins, workflow_id, parameters,
 
     init(blueprint_path=blueprint_path,
          inputs=inputs,
-         install_plugins=install_plugins)
+         install_plugins=install_plugins,
+         repository_addr=repository_addr)
 
     # if no workflow was supplied, execute the `install` workflow
     if not workflow_id:
@@ -95,7 +96,8 @@ def uninstall(workflow_id, parameters, allow_custom_parameters, task_retries,
 # The 'overshadowing' of the `install_plugins` parameter is totally fine
 def init(blueprint_path,
          inputs,
-         install_plugins):
+         install_plugins,
+         repository_addr):
     if os.path.isdir(_storage_dir()):
         shutil.rmtree(_storage_dir())
 
@@ -108,6 +110,7 @@ def init(blueprint_path,
             inputs=inputs,
             storage=_storage(),
             install_plugins=install_plugins,
+            repository_addr=repository_addr,
             resolver=utils.get_import_resolver()
         )
     except ImportError as e:
@@ -176,9 +179,10 @@ def instances(node_id):
                            indent=2))
 
 
-def install_plugins(blueprint_path):
+def install_plugins(blueprint_path, repository_addr=None):
     common.install_blueprint_plugins(
-        blueprint_path=blueprint_path)
+        blueprint_path=blueprint_path,
+        repository_addr=repository_addr)
 
 
 def create_requirements(blueprint_path, output):

@@ -203,7 +203,8 @@ def bootstrap(blueprint_path,
               task_retries=5,
               task_retry_interval=30,
               task_thread_pool_size=1,
-              install_plugins=False):
+              install_plugins=False,
+              repository_addr=None):
 
     def get_protocol(rest_port):
         return constants.SECURED_PROTOCOL \
@@ -218,6 +219,7 @@ def bootstrap(blueprint_path,
             inputs=inputs,
             storage=storage,
             install_plugins=install_plugins,
+            repository_addr=repository_addr,
             resolver=utils.get_import_resolver()
         )
     except ImportError as e:
