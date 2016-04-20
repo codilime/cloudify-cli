@@ -16,6 +16,7 @@
 """
 Handles all commands that start with 'cfy plugins'
 """
+import json
 import tarfile
 
 from cloudify_cli import utils
@@ -25,32 +26,41 @@ from cloudify_cli.utils import print_table
 from cloudify_cli.exceptions import CloudifyCliError
 
 
+def extract_plugin_metadata(plugin_path):
+    with tarfile.open(plugin_path, 'r') as tar:
+        tar_members = tar.getmembers()
+        package_json_path = '{0}/package.json'.format(tar_members[0].name)
+        package_member = tar.getmember(package_json_path)
+        package_json = tar.extractfile(package_member)
+        return json.load(package_json)
+
+
 def validate(plugin_path):
     logger = get_logger()
 
     logger.info(
-        messages.VALIDATING_PLUGIN.format(plugin_path.name))
-    if not tarfile.is_tarfile(plugin_path.name):
+        messages.VALIDATING_PLUGIN.format(plugin_path))
+    if not tarfile.is_tarfile(plugin_path):
         raise CloudifyCliError('Archive {0} is of an unsupported archive type.'
                                ' Only tar.gz is allowed'
-                               .format(plugin_path.name))
-    with tarfile.open(plugin_path.name, 'r') as tar:
-        tar_members = tar.getmembers()
-        package_json_path = '{0}/package.json'.format(tar_members[0].name)
-        try:
-            package_member = tar.getmember(package_json_path)
-        except KeyError:
-            raise CloudifyCliError(messages.VALIDATING_PLUGIN_FAILED
-                                   .format(plugin_path, 'package.json was not '
-                                                        'found in archive'))
-        try:
-            tar.extractfile(package_member).read()
-        except:
-            raise CloudifyCliError(messages.VALIDATING_PLUGIN_FAILED
-                                   .format(plugin_path, 'unable to read '
-                                                        'package.json'))
+                               .format(plugin_path))
 
-    logger.info(messages.VALIDATING_PLUGIN_SUCCEEDED)
+    try:
+        extract_plugin_metadata(plugin_path)
+    except KeyError:
+        raise CloudifyCliError(messages.VALIDATING_PLUGIN_FAILED
+                               .format(plugin_path, 'package.json was not '
+                                                    'found in archive'))
+    except ValueError:
+        raise CloudifyCliError(messages.VALIDATING_PLUGIN_FAILED
+                               .format(plugin_path, 'package.json was not '
+                                                    'correct JSON'))
+    except:
+        raise CloudifyCliError(messages.VALIDATING_PLUGIN_FAILED
+                               .format(plugin_path, 'unable to read '
+                                                    'package.json'))
+    else:
+        logger.info(messages.VALIDATING_PLUGIN_SUCCEEDED)
 
 
 def delete(plugin_id):
