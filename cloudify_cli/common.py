@@ -14,7 +14,6 @@
 # limitations under the License.
 ############
 
-import glob
 from itertools import chain
 import os
 import shutil
@@ -30,6 +29,8 @@ from dsl_parser.parser import parse_from_path
 
 from cloudify_cli import utils
 from cloudify_cli import constants
+from cloudify_cli.commands.plugins import validate, extract_plugin_metadata
+from cloudify_cli.exceptions import CloudifyCliError
 from cloudify_cli.logger import get_logger
 from cloudify_cli.utils import get_rest_client
 
@@ -199,24 +200,49 @@ class ManagerPluginRepository(object):
 class LocalFilePluginRepository(object):
     def __init__(self, directory):
         self._directory = directory
+        self._metadata_cache = None
+
+    def _build_metadata_cache(self):
+        cache = {}
+        for filename in os.listdir(self._directory):
+            path = os.path.join(self._directory, filename)
+            try:
+                validate(path)
+            except CloudifyCliError:
+                continue
+
+            metadata = extract_plugin_metadata(path)
+            cache[filename] = metadata
+        return cache
+
+    @property
+    def metadata(self):
+        if self._metadata_cache is None:
+            self._metadata_cache = self._build_metadata_cache()
+        return self._metadata_cache
 
     def download(self, plugin_id, output_file):
         plugin_filename = os.path.join(self._directory, plugin_id)
         shutil.copy(plugin_filename, output_file)
 
-    def find_plugin(self, plugin):
-        pattern = '*{plugin[package_name]}*{plugin[package_version]}*'.format(
-            plugin=plugin)
-        filenames = glob.glob(pattern)
+    def _match(self, plugin_metadata, search_params):
+        for key_to_check in ['package_name', 'package_version']:
+            if key_to_check not in search_params:
+                continue
+            if plugin_metadata[key_to_check] != search_params[key_to_check]:
+                return False
+        return True
 
-        if not filenames:
+    def find_plugin(self, plugin):
+        for plugin_filename, plugin_metadata in self.metadata.items():
+            if self._match(plugin_metadata, plugin):
+                return Plugin({'id': plugin_filename})
+        else:
             raise ValueError('No wagon found for plugin '
                              '{plugin[package_name]}-{plugin[package_version]}'
                              ' in directory {directory}'.format(
                                  plugin=plugin,
                                  directory=os.path.abspath(self._directory)))
-        repository_plugin = filenames[0]
-        return Plugin(id=repository_plugin)
 
 
 def _make_plugins_repository(repository_addr=None):
