@@ -115,11 +115,16 @@ def install_blueprint_plugins(blueprint_path, repository_addr=None):
             raise CloudifyCliError(
                 'You must be running inside a '
                 'virtualenv to install blueprint plugins')
-        if source_plugins:
-            _install_source_plugins(blueprint_path, source_plugins)
+
+        # if source_plugins:
+        #     _install_source_plugins(blueprint_path, source_plugins)
+
         if repository_plugins:
             repository = _make_plugins_repository(repository_addr)
-            _install_repository_plugins(repository, repository_plugins)
+
+            for plugin in repository_plugins:
+                _install_repository_plugin(repository, plugin)
+
     else:
         get_logger().debug('There are no plugins to install..')
 
@@ -159,7 +164,8 @@ def _install_source_plugins(blueprint_path, plugins):
                stdout_pipe=False)
 
 
-def _install_repository_plugin(repository, repository_plugin):
+def _install_repository_plugin(repository, plugin):
+    repository_plugin = repository.find_plugin(plugin)
     logger = get_logger()
     plugin_id = repository_plugin.id
     wagon_dir = tempfile.mkdtemp(prefix='{0}-'.format(plugin_id))
@@ -172,19 +178,12 @@ def _install_repository_plugin(repository, repository_plugin):
         logger.debug('Installing plugin {0} using wagon'
                      .format(plugin_id))
         w = wagon.Wagon(source=wagon_path)
-        args = ''
         w.install(ignore_platform=True,
-                  install_args=args)
+                  install_args=get_install_args(plugin))
     finally:
         logger.debug('Removing directory: {0}'
                      .format(wagon_dir))
         shutil.rmtree(wagon_dir)
-
-
-def _install_repository_plugins(repository, plugins):
-    for plugin in plugins:
-        repository_plugin = repository.find_plugin(plugin)
-        _install_repository_plugin(repository, repository_plugin)
 
 
 class ManagerPluginRepository(object):
@@ -270,3 +269,8 @@ def _make_plugins_repository(repository_addr=None):
                          .format(parsed_url.scheme))
     else:
         return LocalFilePluginRepository(repository_addr)
+
+
+def get_install_args(plugin):
+    """Normalize the additional arguments to pip declared in the plugin."""
+    return plugin.get('install_arguments', '').strip()
