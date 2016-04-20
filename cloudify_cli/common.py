@@ -99,8 +99,8 @@ def install_blueprint_plugins(blueprint_path, repository_addr=None):
     remote, as specified with repository_addr), and installed separately,
     using a wagon distribution.
     """
-    # TODO check virtualenv, pass virtualenv to wagon
     # TODO add install_arguments
+
     source_plugins = []
     repository_plugins = []
 
@@ -110,9 +110,18 @@ def install_blueprint_plugins(blueprint_path, repository_addr=None):
         else:
             repository_plugins.append(plugin)
 
-    _install_source_plugins(blueprint_path, source_plugins)
-    repository = _make_plugins_repository(repository_addr)
-    _install_repository_plugins(repository, repository_plugins)
+    if source_plugins or repository_plugins:
+        if not utils.is_virtual_env():
+            raise CloudifyCliError(
+                'You must be running inside a '
+                'virtualenv to install blueprint plugins')
+        if source_plugins:
+            _install_source_plugins(blueprint_path, source_plugins)
+        if repository_plugins:
+            repository = _make_plugins_repository(repository_addr)
+            _install_repository_plugins(repository, repository_plugins)
+    else:
+        get_logger().debug('There are no plugins to install..')
 
 
 def _plugins_to_requirements(blueprint_path, plugins):
