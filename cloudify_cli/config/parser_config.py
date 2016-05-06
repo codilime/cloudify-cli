@@ -253,6 +253,14 @@ def parser_config():
             }
         },
         'commands': {
+            'sanity': {
+                'handler': cfy.sanity,
+                'help': 'Run sanity checks'
+            },
+            'preupgrade': {
+                'handler': cfy.preupgrade,
+                'help': 'Run the pre-upgrade validations'
+            },
             'logs': {
                 'help': 'Handle Cloudify Manager logs',
                 'sub_commands': {
