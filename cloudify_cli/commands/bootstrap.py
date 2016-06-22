@@ -18,6 +18,7 @@ Handles 'cfy bootstrap'
 """
 
 import sys
+import webbrowser
 
 from cloudify_cli import utils
 from cloudify_cli.logger import get_logger
@@ -67,6 +68,7 @@ def bootstrap(keep_up,
     if not validate_only:
         try:
             logger.info('Executing manager bootstrap...')
+            webbrowser.open('https://www.youtube.com/embed/HQoRXhS7vlU')
             details = bs.bootstrap(
                 blueprint_path,
                 name=env_name,
