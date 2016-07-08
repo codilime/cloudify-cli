@@ -327,7 +327,7 @@ def get_cwd():
 
 def get_rest_client(rest_host=None, rest_port=None, rest_protocol=None,
                     username=None, password=None, trust_all=None,
-                    skip_version_check=False):
+                    skip_version_check=True):
     if not rest_host:
         rest_host = get_rest_host()
 

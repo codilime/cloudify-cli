@@ -148,7 +148,6 @@ def bootstrap_validation(blueprint_path,
                          install_plugins=False,
                          resolver=None):
     validate_manager_deployment_size(blueprint_path=blueprint_path)
-
     try:
         env = common.initialize_blueprint(
             blueprint_path,
@@ -249,7 +248,6 @@ def bootstrap(blueprint_path,
               task_retry_interval=30,
               task_thread_pool_size=1,
               install_plugins=False):
-
     storage = local.FileStorage(storage_dir=_workdir())
     try:
         env = common.initialize_blueprint(
@@ -277,7 +275,6 @@ def bootstrap(blueprint_path,
     nodes = env.storage.get_nodes()
     node_instances = env.storage.get_node_instances()
     nodes_by_id = {node.id: node for node in nodes}
-
     try:
         manager_node_instance = \
             next(node_instance for node_instance in node_instances if
@@ -345,12 +342,12 @@ def bootstrap(blueprint_path,
         _upload_resources(manager_node, fabric_env, rest_client, task_retries,
                           task_retry_interval)
 
-        _perform_sanity(env=env,
-                        manager_ip=manager_ip,
-                        fabric_env=fabric_env,
-                        task_retries=task_retries,
-                        task_retry_interval=task_retry_interval,
-                        task_thread_pool_size=task_thread_pool_size)
+        # _perform_sanity(env=env,
+        #                 manager_ip=manager_ip,
+        #                 fabric_env=fabric_env,
+        #                 task_retries=task_retries,
+        #                 task_retry_interval=task_retry_interval,
+        #                 task_thread_pool_size=task_thread_pool_size)
 
     return {
         'provider_name': 'provider',

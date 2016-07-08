@@ -42,7 +42,7 @@ verbosity_level = NO_VERBOSE
 
 def main():
     _configure_loggers()
-    _set_cli_except_hook()
+    # _set_cli_except_hook()
     args = _parse_args(sys.argv[1:])
     args.handler(args)
 
