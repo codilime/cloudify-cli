@@ -276,9 +276,12 @@ def bootstrap(blueprint_path,
                 task_retries=task_retries,
                 task_retry_interval=task_retry_interval,
                 task_thread_pool_size=task_thread_pool_size)
-
+    logger = get_logger()
+    logger.error('install done')
     nodes = env.storage.get_nodes()
+    logger.error('getnodes done')
     node_instances = env.storage.get_node_instances()
+    logger.error('getnodesinstances done')
     nodes_by_id = {node.id: node for node in nodes}
 
     try:
@@ -297,7 +300,7 @@ def bootstrap(blueprint_path,
         constants.REST_PORT_RUNTIME_PROPERTY]
     rest_protocol = manager_node_instance.runtime_properties[
         constants.REST_PROTOCOL_RUNTIME_PROPERTY]
-
+    logger.error('restport protocol {0} {1} '.format(rest_port, rest_protocol))
     if manager_node_instance.runtime_properties.get('provider'):
         provider_context = \
             manager_node_instance.runtime_properties[
@@ -332,30 +335,30 @@ def bootstrap(blueprint_path,
             cert_path = utils.get_default_rest_cert_local_path()
             with open(cert_path, 'w') as cert_file:
                 cert_file.write(rest_public_cert)
-
+        logger.error('ok! getting client')
         rest_client = utils.get_rest_client(rest_host=manager_ip,
                                             rest_port=rest_port,
                                             rest_protocol=rest_protocol,
                                             username=utils.get_username(),
                                             password=utils.get_password(),
                                             skip_version_check=True)
-
+        logger.error('got client')
         provider_context = _handle_provider_context(
             rest_client=rest_client,
             remote_agents_private_key_path=agent_remote_key_path,
             manager_node=manager_node,
             manager_node_instance=manager_node_instance)
-
+        logger.error('ctx uploaded')
         _upload_resources(manager_node, fabric_env, rest_client, task_retries,
                           task_retry_interval)
-
+        logger.error('resources uploaded')
         _perform_sanity(env=env,
                         manager_ip=manager_ip,
                         fabric_env=fabric_env,
                         task_retries=task_retries,
                         task_retry_interval=task_retry_interval,
                         task_thread_pool_size=task_thread_pool_size)
-
+        logger.error('sanity done')
     return {
         'provider_name': 'provider',
         'provider_context': provider_context,
