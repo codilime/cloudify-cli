@@ -164,3 +164,16 @@ INSTALL_SCRIPT_LOCATION = \
     'Alternative location of the `install_agents.py` script'
 TENANT = 'The name of the tenant'
 GROUP = 'The name of the user group'
+
+CLUSTER_CONSUL_KEY = (
+    'The encryption key to be used with consul (needs to be the same for all '
+    'the members of the cluster). A new key will be generated if not set.'
+)
+CLUSTER_HOST_IP = \
+    'The IP of this machine to use for advertising to the cluster'
+CLUSTER_JOIN = 'Address of one of the cluster members'
+CLUSTER_VIRTUAL_IP = 'The virtual IP address used by the HA cluster'
+CLUSTER_NETWORK_INTERFACE = \
+    'The network interface on this machine to use for the virtual IP'
+CLUSTER_NODE_NAME = \
+    'Name of this manager machine to be used internally in the cluster'
