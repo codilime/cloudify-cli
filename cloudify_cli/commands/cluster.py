@@ -14,13 +14,13 @@
 # limitations under the License.
 ############
 
+import time
+
 from .. import env
 from .. import table
 from ..cli import cfy
-from ..logger import get_events_logger
-from ..exceptions import CloudifyCliError, ExecutionTimeoutError, \
-    SuppressedCloudifyCliError
-from ..execution_events_fetcher import wait_for_execution
+from ..exceptions import CloudifyCliError
+from ..execution_events_fetcher import WAIT_FOR_EXECUTION_SLEEP_INTERVAL
 
 
 def _verify_not_in_cluster(client):
@@ -46,8 +46,8 @@ def status(client, logger):
     if not status.initialized:
         logger.error('This manager is not part of a Cloudify HA cluster')
     else:
-        logger.info('Cluster virtual IP: {0}\nEncryption key: {1}'
-                    .format(status.virtual_ip, status.encryption_key))
+        logger.info('The cluster is initialized.\nEncryption key: {0}'
+                    .format(status.encryption_key))
 
 
 @cluster.command(name='start',
@@ -72,28 +72,19 @@ def start(client,
 
     logger.info('Creating a new Cloudify HA cluster')
 
-    execution = client.cluster.start(config={
+    client.cluster.start(config={
         'host_ip': cluster_host_ip,
         'node_name': cluster_node_name,
         'consul_key': cluster_consul_key,
         'network_interface': cluster_network_interface,
         'virtual_ip': cluster_virtual_ip
     })
-    events_logger = get_events_logger(json_output=False)
-    try:
-        wait_for_execution(
-            client,
-            execution,
-            events_handler=events_logger)
-    except ExecutionTimeoutError as e:
-        logger.info('HA cluster creation execution timed out')
-        events_tail_message = "* Run 'cfy events list --tail --include-logs " \
-                              "--execution-id {0}' to retrieve the " \
-                              "execution's events/logs"
-        logger.info(events_tail_message.format(e.execution_id))
-        raise SuppressedCloudifyCliError()
+    status = _wait_for_cluster_initialized(client)
 
-    # TODO change the current profile to use the virtual ip
+    if status.error:
+        logger.error('Error while configuring the HA cluster')
+        raise CloudifyCliError(status.error)
+
     logger.info('HA cluster started at {0}.\n'
                 'Encryption key used is: {1}'
                 .format(cluster_host_ip, cluster_consul_key))
@@ -121,27 +112,18 @@ def join(client,
 
     logger.info('Joining the Cloudify HA cluster: {0}'.format(cluster_join))
 
-    execution = client.cluster.start(node_id=cluster_node_name, config={
+    client.cluster.join(node_id=cluster_node_name, config={
         'host_ip': cluster_host_ip,
         'node_name': cluster_node_name,
         'consul_key': cluster_consul_key,
         'network_interface': cluster_network_interface,
         'join_addrs': cluster_join
     })
+    status = _wait_for_cluster_initialized(client)
 
-    events_logger = get_events_logger(json_output=False)
-    try:
-        wait_for_execution(
-            client,
-            execution,
-            events_handler=events_logger)
-    except ExecutionTimeoutError as e:
-        logger.info('HA cluster join execution timed out')
-        events_tail_message = "* Run 'cfy events list --tail --include-logs " \
-                              "--execution-id {0}' to retrieve the " \
-                              "execution's events/logs"
-        logger.info(events_tail_message.format(e.execution_id))
-        raise SuppressedCloudifyCliError()
+    if status.error:
+        logger.error('Error while joining the HA cluster')
+        raise CloudifyCliError(status.error)
 
     # TODO: do something with the current profile?
     logger.info('HA cluster joined successfully!')
@@ -193,3 +175,21 @@ def delete_node(client, logger, node_name):
     raise NotImplementedError('Not implemented yet')
     client.cluster.nodes.delete(node_name)
     logger.info('Node {0} was deleted from the cluster'.format(node_name))
+
+
+def _wait_for_cluster_initialized(client, timeout=900):
+    if timeout is not None:
+        deadline = time.time() + timeout
+
+    while True:
+        if timeout is not None:
+            if time.time() > deadline:
+                raise CloudifyCliError('Timed out waiting for the HA '
+                                       'cluster to be initialized.')
+
+        status = client.cluster.get()
+        if status.initialized or status.error:
+            break
+        time.sleep(WAIT_FOR_EXECUTION_SLEEP_INTERVAL)
+
+    return status
